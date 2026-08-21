@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16.1
+    container_name: avito_db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=avitodb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=12345
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+volumes:
+  postgres_data:
