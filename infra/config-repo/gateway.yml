@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: users-server
+          uri: lb://user-server
+          predicates:
+            - Path=/users/**
+
+        - id: items-server-item
+          uri: lb://item-server
+          predicates:
+              - Path=/items/**
+
+        - id: items-server-comments
+          uri: lb://item-server
+          predicates:
+            - Path=/comments/**
+
+        - id: bookings-server
+          uri: lb://booking-server
+          predicates:
+            - Path=/bookings/**
+      discovery:
+        locator:
+          enabled: false

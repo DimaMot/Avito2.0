@@ -1,0 +1,7 @@
+package ru.project.booking.exceptions;
+
+public class ValidatedException extends RuntimeException {
+    public ValidatedException(String message) {
+        super(message);
+    }
+}
