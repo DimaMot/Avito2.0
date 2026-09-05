@@ -1,20 +1,169 @@
 services:
-  db:
-    image: postgres:16.1
-    container_name: avito_db
-    ports:
-      - "5432:5432"
+  config-server:
+    build:
+      context: ./infra/config-server
+      dockerfile: Dockerfile
+    container_name: config-server
     environment:
-      - POSTGRES_DB=avitodb
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=12345
+      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:/app/config-repo/
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./infra/config-repo:/app/config-repo
+    ports:
+      - "8888:8888"
     healthcheck:
-      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      test: ["CMD-SHELL", "curl -f http://localhost:8888/actuator/health || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 10s
+
+  discovery-server:
+    build:
+      context: ./infra/discovery-server
+      dockerfile: Dockerfile
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+    depends_on:
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/ || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  gateway-server:
+    build:
+      context: ./infra/gateway
+      dockerfile: Dockerfile
+    container_name: gateway-server
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+
+  user-server:
+    build:
+      context: ./avito-services/avito-users
+      dockerfile: Dockerfile
+    container_name: user-server
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://userDB:5432/usersDB
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+    depends_on:
+      userDB:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+
+  item-server:
+    build:
+      context: ./avito-services/avito-items
+      dockerfile: Dockerfile
+    container_name: item-server
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://itemDB:5432/itemsDB
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+    depends_on:
+      itemDB:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+
+  booking-server:
+    build:
+      context: ./avito-services/avito-bookings
+      dockerfile: Dockerfile
+    container_name: booking-server
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://bookingDB:5432/bookingsDB
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+    depends_on:
+      bookingDB:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+
+  userDB:
+    image: postgres:16.1
+    container_name: avito-userDB
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=usersDB
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=12345
+    volumes:
+      - postgresql_USERSdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -d usersDB -U user"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  itemDB:
+    image: postgres:16.1
+    container_name: avito-itemDB
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=itemsDB
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=12345
+    volumes:
+      - postgresql_ITEMSdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -d itemsDB -U user"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  bookingDB:
+    image: postgres:16.1
+    container_name: avito-bookingDB
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=bookingsDB
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=12345
+    volumes:
+      - postgresql_BOOKINGSdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -d bookingsDB -U user"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
 volumes:
-  postgres_data:
+  postgresql_ITEMSdata:
+  postgresql_USERSdata:
+  postgresql_BOOKINGSdata:
