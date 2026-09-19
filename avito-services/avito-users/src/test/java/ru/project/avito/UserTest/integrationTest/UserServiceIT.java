@@ -1,5 +1,6 @@
 package ru.project.avito.UserTest.integrationTest;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import ru.project.user.dto.UserDto;
 import ru.project.user.exceptions.EmailConflictException;
 import ru.project.user.exceptions.NotFoundException;
 import ru.project.user.feign.ItemClientForUsers;
+import ru.project.user.model.User;
 import ru.project.user.service.UserService;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DisplayName("Интеграционные тесты UserService")
 public class UserServiceIT extends BaseIntegrationTest {
-
+    private final long userTestId = 1L;
     @Autowired
     private UserService userService;
 
@@ -32,26 +34,58 @@ public class UserServiceIT extends BaseIntegrationTest {
     @MockBean
     private ItemClientForUsers itemClient;
 
+    @Autowired
+    private EntityManager entityManager;
+
     @Test
-    @DisplayName("Успешный цикл CRUD операций")
-    void CRUD_Check() {
+    @DisplayName("Успешное создание пользователя")
+    void createUser() {
         CreateUserDto create = new CreateUserDto("Дмитрий", "email@mail.ru");
         UserDto savedUser = userService.createUser(create);
+        entityManager.flush();
+        entityManager.clear();
 
         assertNotNull(savedUser.id());
         assertEquals(1, userRepository.count());
         assertEquals("Дмитрий", savedUser.name());
+    }
 
-        UserDto userById = userService.getUserById(savedUser.id());
-        assertEquals(savedUser.id(), userById.id());
-        assertEquals("email@mail.ru", userById.email());
+    @Test
+    @DisplayName("Успешное получение пользователя")
+    void getUserById() {
+        User user = userRepository.saveAndFlush(new User(userTestId, "dima", "dima@mail.ru"));
+        entityManager.clear();
 
-        UserDto requestToUpdate = new UserDto(savedUser.id(), "NewДмитрий", "email@mail.ru");
-        UserDto updated = userService.update(savedUser.id(), requestToUpdate);
+        UserDto userById = userService.getUserById(user.getId());
+        assertEquals(user.getId(), userById.id());
+        assertEquals("dima@mail.ru", userById.email());
+    }
+
+    @Test
+    @DisplayName("Успешное обновление пользователя")
+    void updateUser() {
+        User user = userRepository.saveAndFlush(new User(userTestId, "dima", "dima@mail.ru"));
+        entityManager.clear();
+
+        UserDto requestToUpdate = new UserDto(user.getId(), "NewДмитрий", "email@mail.ru");
+        UserDto updated = userService.update(user.getId(), requestToUpdate);
+        entityManager.flush();
+        entityManager.clear();
+
         assertEquals("NewДмитрий", updated.name());
         assertEquals(1, userRepository.count());
+    }
 
-        userService.deleteById(savedUser.id());
+    @Test
+    @DisplayName("Успешное удаление пользователя")
+    void deleteUser() {
+        User user = userRepository.saveAndFlush(new User(userTestId, "dima", "dima@mail.ru"));
+        entityManager.clear();
+
+        userService.deleteById(user.getId());
+        entityManager.flush();
+        entityManager.clear();
+
         assertEquals(0, userRepository.count());
     }
 

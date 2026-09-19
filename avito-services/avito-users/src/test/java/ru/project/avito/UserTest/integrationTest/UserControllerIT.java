@@ -1,5 +1,6 @@
 package ru.project.avito.UserTest.integrationTest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,16 +10,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.project.user.UserApplication;
 import ru.project.user.dao.UserRepository;
 import ru.project.user.dto.CreateUserDto;
 import ru.project.user.feign.ItemClientForUsers;
-import ru.project.user.service.UserService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,9 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerIT extends BaseIntegrationTest {
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,7 +50,7 @@ public class UserControllerIT extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(createUser)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("name"))
-                .andExpect(jsonPath("$.email").value( "email@mail.ru"));
+                .andExpect(jsonPath("$.email").value("email@mail.ru"));
 
         assertEquals(1, userRepository.count());
         assertNotNull(userRepository.findAll().getFirst().getId());
@@ -64,6 +61,6 @@ public class UserControllerIT extends BaseIntegrationTest {
     void deleteUserIfNotExist() throws Exception {
         mockMvc.perform(delete("/users/999"))
                 .andExpect(status().isNotFound());
-        assertEquals(0,userRepository.count());
+        assertEquals(0, userRepository.count());
     }
 }
