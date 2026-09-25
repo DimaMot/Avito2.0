@@ -3,6 +3,7 @@ package ru.project.booking.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.project.booking.dto.BookingCreateDto;
 import ru.project.booking.dto.BookingResponseDto;
@@ -22,6 +23,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public BookingResponseDto createBooking(@Valid @RequestBody BookingCreateDto createDto,
                                             @RequestHeader(USER_HEADER) long userId) {
         return bookingService.createBooking(createDto, userId);
