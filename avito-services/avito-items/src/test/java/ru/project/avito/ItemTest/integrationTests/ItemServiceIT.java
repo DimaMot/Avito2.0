@@ -8,11 +8,9 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.transaction.annotation.Transactional;
-import ru.project.item.ItemApplication;
 import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.*;
 import ru.project.item.dto.mapper.CommentMapper;
@@ -32,9 +30,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@Transactional
-@SpringBootTest(classes = ItemApplication.class,
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @DisplayName("Интеграционные тесты ItemService")
 public class ItemServiceIT extends BaseIntegrationTest {
 

@@ -19,9 +19,6 @@ import ru.project.user.service.UserService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Transactional
-@SpringBootTest(classes = UserApplication.class,
-        webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DisplayName("Интеграционные тесты UserService")
 public class UserServiceIT extends BaseIntegrationTest {
     private final long userTestId = 1L;

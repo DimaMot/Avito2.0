@@ -1,9 +1,7 @@
 package ru.project.booking.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 
@@ -12,6 +10,8 @@ import java.time.OffsetDateTime;
 @ToString
 @Entity
 @Table(name = "bookings")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

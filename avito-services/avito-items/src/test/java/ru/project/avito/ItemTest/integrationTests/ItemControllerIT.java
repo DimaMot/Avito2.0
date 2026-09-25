@@ -5,12 +5,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import ru.project.item.ItemApplication;
 import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.ItemCreatDto;
 import ru.project.item.dto.UserDto;
@@ -23,13 +21,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Transactional
-@SpringBootTest(classes = ItemApplication.class,
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @DisplayName("Интеграционные тесты ItemController")
 public class ItemControllerIT extends BaseIntegrationTest {
@@ -61,9 +57,9 @@ public class ItemControllerIT extends BaseIntegrationTest {
         when(userClient.getUserById(testUserId)).thenReturn(user);
 
         mockMvc.perform(post("/items")
-                    .header(USER_HEADER, testUserId)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(itemCreatDto)))
+                        .header(USER_HEADER, testUserId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(itemCreatDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("дрель"))
                 .andExpect(jsonPath("$.description").value("хорошая дрель"))
@@ -77,7 +73,7 @@ public class ItemControllerIT extends BaseIntegrationTest {
     @DisplayName("Попытка получения несуществующего предмета")
     void getItemWhichDoesNotExist() throws Exception {
         mockMvc.perform(get("/items/999")
-                    .header(USER_HEADER, testUserId))
+                        .header(USER_HEADER, testUserId))
                 .andExpect(status().isNotFound());
     }
 
