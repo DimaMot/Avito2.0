@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.transaction.annotation.Transactional;
 import ru.project.user.UserApplication;
 import ru.project.user.dao.UserRepository;
 import ru.project.user.dto.CreateUserDto;
@@ -19,6 +18,8 @@ import ru.project.user.service.UserService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest(classes = UserApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DisplayName("Интеграционные тесты UserService")
 public class UserServiceIT extends BaseIntegrationTest {
     private final long userTestId = 1L;
@@ -50,7 +51,8 @@ public class UserServiceIT extends BaseIntegrationTest {
     @Test
     @DisplayName("Успешное получение пользователя")
     void getUserById() {
-        User user = userRepository.saveAndFlush(new User(userTestId, "dima", "dima@mail.ru"));
+        User user = new User(1L, "dima", "dima@mail.ru");
+        user = userRepository.saveAndFlush(user);
         entityManager.clear();
 
         UserDto userById = userService.getUserById(user.getId());
@@ -89,7 +91,7 @@ public class UserServiceIT extends BaseIntegrationTest {
     @Test
     @DisplayName("Выброс EmailConflictException при попытке сохранить дубликат почты в базу данных")
     void conflictEmail() {
-        CreateUserDto createUser = new CreateUserDto("name","doubleEmial@mail.com");
+        CreateUserDto createUser = new CreateUserDto("name", "doubleEmial@mail.com");
         userService.createUser(createUser);
         CreateUserDto doubleUser = new CreateUserDto("name", "doubleEmial@mail.com");
         assertThrows(EmailConflictException.class, () -> userService.createUser(doubleUser));

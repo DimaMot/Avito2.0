@@ -1,6 +1,5 @@
 package ru.project.avito.bookingTest.unitTests;
 
-
 import feign.FeignException;
 import feign.Request;
 import feign.RequestTemplate;

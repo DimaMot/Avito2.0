@@ -1,6 +1,5 @@
 package ru.project.avito.ItemTest.integrationTests;
 
-
 import feign.FeignException;
 import feign.Request;
 import feign.RequestTemplate;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.transaction.annotation.Transactional;
 import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.*;
 import ru.project.item.dto.mapper.CommentMapper;
