@@ -2,6 +2,7 @@ package ru.project.booking.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import ru.project.booking.model.BookingStatus;
+import ru.project.commonlib.http.user.UserDto;
 
 import java.time.OffsetDateTime;
 

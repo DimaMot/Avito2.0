@@ -18,6 +18,9 @@ import ru.project.booking.model.BookingStatus;
 import ru.project.booking.service.search.BookingSearchRegistry;
 import ru.project.booking.service.search.role.BookingUserRole;
 import ru.project.booking.service.validator.BookingValidator;
+import ru.project.commonlib.http.booking.BookingShortDto;
+import ru.project.commonlib.http.item.ItemDtoForBookingService;
+import ru.project.commonlib.http.user.UserDto;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -47,7 +50,7 @@ public class BookingServiceImpl implements BookingService {
 
         validator.validateDates(createDto.start(), createDto.end());
 
-        ItemDto item = getItemFromOrThrow(createDto.itemId());
+        ItemDtoForBookingService item = getItemFromOrThrow(createDto.itemId());
         UserDto user = getUserFromOrThrow(userId);
 
         validator.validateItemAvailable(item, user, userId);
@@ -65,7 +68,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено"));
 
-        ItemDto item = getItemFromOrThrow(booking.getItemId());
+        ItemDtoForBookingService item = getItemFromOrThrow(booking.getItemId());
         UserDto user = getUserFromOrThrow(booking.getBookerId());
 
         validator.validateChangeBookingStatus(booking, item, userId);
@@ -81,7 +84,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено"));
 
-        ItemDto item = getItemFromOrThrow(booking.getItemId());
+        ItemDtoForBookingService item = getItemFromOrThrow(booking.getItemId());
         UserDto user = getUserFromOrThrow(booking.getBookerId());
 
         if (booking.getBookerId() != userId && item.ownerId() != userId) {
@@ -131,7 +134,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.getBookingForComment(userId, itemId, currentTime);
     }
 
-    private ItemDto getItemFromOrThrow(long itemId) {
+    private ItemDtoForBookingService getItemFromOrThrow(long itemId) {
         try {
             return itemClient.getItemById(itemId);
         } catch (FeignException.NotFound e) {
@@ -160,18 +163,18 @@ public class BookingServiceImpl implements BookingService {
                 .distinct()
                 .toList();
 
-        List<ItemDto> items = itemClient.getItemsByIds(itemIds);
+        List<ItemDtoForBookingService> items = itemClient.getItemsByIds(itemIds);
         List<UserDto> users = userClient.getUsersByIds(userIds);
 
         final Map<Long, UserDto> usersMap = users.stream()
                 .collect(Collectors.toMap(UserDto::id, u -> u));
-        final Map<Long, ItemDto> itemsMap = items.stream()
-                .collect(Collectors.toMap(ItemDto::id, i -> i));
+        final Map<Long, ItemDtoForBookingService> itemsMap = items.stream()
+                .collect(Collectors.toMap(ItemDtoForBookingService::id, i -> i));
 
         return bookings.stream()
                 .map(b -> {
                     UserDto userDto = usersMap.get(b.getBookerId());
-                    ItemDto itemDto = itemsMap.get(b.getItemId());
+                    ItemDtoForBookingService itemDto = itemsMap.get(b.getItemId());
                     return bookingMapper.responseDto(b,userDto, itemDto);
                 })
                 .sorted(Comparator.comparing(BookingResponseDto::start))

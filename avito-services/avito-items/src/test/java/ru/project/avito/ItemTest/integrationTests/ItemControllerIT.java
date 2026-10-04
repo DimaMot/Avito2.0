@@ -8,9 +8,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.project.commonlib.http.user.UserDto;
 import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.ItemCreatDto;
-import ru.project.item.dto.UserDto;
 import ru.project.item.feign.BookingClient;
 import ru.project.item.feign.UserForItemClient;
 import ru.project.item.model.Item;

@@ -10,8 +10,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import ru.project.booking.dao.BookingRepository;
 import ru.project.booking.dto.BookingCreateDto;
 import ru.project.booking.dto.BookingResponseDto;
-import ru.project.booking.dto.ItemDto;
-import ru.project.booking.dto.UserDto;
 import ru.project.booking.dto.mapper.BookingMapper;
 import ru.project.booking.exceptions.NotFoundException;
 import ru.project.booking.exceptions.ValidatedException;
@@ -21,6 +19,8 @@ import ru.project.booking.model.Booking;
 import ru.project.booking.model.BookingStatus;
 import ru.project.booking.service.BookingService;
 import ru.project.booking.service.validator.BookingValidator;
+import ru.project.commonlib.http.item.ItemDtoForBookingService;
+import ru.project.commonlib.http.user.UserDto;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -55,7 +55,7 @@ public class BookingServiceIT extends BaseIntegrationTest {
     private final long testItemId = 1L;
     private final long testUserId = 2L;
 
-    private ItemDto defaultItem;
+    private ItemDtoForBookingService defaultItem;
     private UserDto defaultUser;
 
     @BeforeEach
@@ -63,7 +63,7 @@ public class BookingServiceIT extends BaseIntegrationTest {
         doReturn(Instant.parse("2026-09-05T12:00:00Z")).when(clock).instant();
         doReturn(ZoneId.of("UTC")).when(clock).getZone();
 
-        defaultItem = new ItemDto(testItemId, "Thing", "good thing", true, 1L);
+        defaultItem = new ItemDtoForBookingService(testItemId, "Thing", "good thing", true, 1L);
         defaultUser = new UserDto(testUserId, "dima", "dima@mail.ru");
     }
 
