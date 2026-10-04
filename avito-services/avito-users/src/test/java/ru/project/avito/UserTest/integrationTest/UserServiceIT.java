@@ -51,8 +51,7 @@ public class UserServiceIT extends BaseIntegrationTest {
     @Test
     @DisplayName("Успешное получение пользователя")
     void getUserById() {
-        User user = new User(1L, "dima", "dima@mail.ru");
-        user = userRepository.saveAndFlush(user);
+        User user = userRepository.saveAndFlush(new User(userTestId, "dima", "dima@mail.ru"));
         entityManager.clear();
 
         UserDto userById = userService.getUserById(user.getId());
