@@ -2,7 +2,7 @@ package ru.project.item.service.validate;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.project.item.dto.BookingShortDto;
+import ru.project.commonlib.http.booking.BookingShortDto;
 import ru.project.item.dto.ItemCreatDto;
 import ru.project.item.exceptions.ValidatedException;
 import ru.project.item.feign.BookingClient;

@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.project.commonlib.http.booking.BookingShortDto;
+import ru.project.commonlib.http.user.UserDto;
 import ru.project.item.dao.CommentRepository;
 import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.*;

@@ -7,8 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.project.booking.dto.BookingCreateDto;
 import ru.project.booking.dto.BookingResponseDto;
-import ru.project.booking.dto.BookingShortDto;
 import ru.project.booking.service.BookingService;
+import ru.project.commonlib.http.booking.BookingShortDto;
 
 import java.time.OffsetDateTime;
 import java.util.List;

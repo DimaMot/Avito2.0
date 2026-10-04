@@ -3,8 +3,11 @@ package ru.project.booking.dto.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
-import ru.project.booking.dto.*;
+import ru.project.booking.dto.BookingCreateDto;
+import ru.project.booking.dto.BookingResponseDto;
 import ru.project.booking.model.Booking;
+import ru.project.commonlib.http.item.ItemDtoForBookingService;
+import ru.project.commonlib.http.user.UserDto;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface BookingMapper {
@@ -15,5 +18,5 @@ public interface BookingMapper {
     @Mapping(source = "booking.id", target = "id")
     @Mapping(source = "user", target = "booker")
     @Mapping(source = "item", target = "item")
-    BookingResponseDto responseDto(Booking booking, UserDto user, ItemDto item);
+    BookingResponseDto responseDto(Booking booking, UserDto user, ItemDtoForBookingService item);
 }

@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.project.commonlib.http.booking.BookingShortDto;
+import ru.project.commonlib.http.user.UserDto;
 import ru.project.item.dao.CommentRepository;
 import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.*;

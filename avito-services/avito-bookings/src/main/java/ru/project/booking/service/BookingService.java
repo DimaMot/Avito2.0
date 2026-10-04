@@ -2,7 +2,7 @@ package ru.project.booking.service;
 
 import ru.project.booking.dto.BookingCreateDto;
 import ru.project.booking.dto.BookingResponseDto;
-import ru.project.booking.dto.BookingShortDto;
+import ru.project.commonlib.http.booking.BookingShortDto;
 
 import java.time.OffsetDateTime;
 import java.util.List;

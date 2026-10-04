@@ -1,4 +1,4 @@
-package ru.project.booking.dto;
+package ru.project.commonlib.http.booking;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

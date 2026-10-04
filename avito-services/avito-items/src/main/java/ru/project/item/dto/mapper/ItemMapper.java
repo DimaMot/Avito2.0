@@ -4,7 +4,7 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
-import ru.project.item.dto.BookingShortDto;
+import ru.project.commonlib.http.booking.BookingShortDto;
 import ru.project.item.dto.ItemCreatDto;
 import ru.project.item.dto.ItemDto;
 import ru.project.item.dto.ItemWithBookingDto;

@@ -1,6 +1,6 @@
-package ru.project.booking.dto;
+package ru.project.commonlib.http.item;
 
-public record ItemDto(
+public record ItemDtoForBookingService(
         Long id,
         String name, // — краткое название;
         String description, // — развёрнутое описание;
