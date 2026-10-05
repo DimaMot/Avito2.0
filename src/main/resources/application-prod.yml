@@ -1,9 +1,0 @@
-spring:
-  jpa:
-    hibernate:
-      ddl-auto: always
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/avitodb
-    username: user
-    password: 12345
