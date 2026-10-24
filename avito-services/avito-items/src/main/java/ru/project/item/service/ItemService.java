@@ -5,13 +5,13 @@ import ru.project.item.dto.*;
 import java.util.List;
 
 public interface ItemService {
-    List<ItemDto> searchItems(String text);
+    List<ItemDto> searchItems(String text, String city, Long userId);
 
     List<ItemWithCommentsDto> getAllItems();
 
     List<ItemWithBookingDto> getAllItemsFromUser(long userId);
 
-    ItemWithBookingDto getItemById(long itemId, long userId);
+    ItemWithBookingDto getItemById(long itemId, long userId, String city);
 
     ItemDto creatItem(ItemCreatDto itemCreat, long userId);
 

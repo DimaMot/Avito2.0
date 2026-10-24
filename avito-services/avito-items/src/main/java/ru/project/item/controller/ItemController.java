@@ -19,16 +19,21 @@ import java.util.List;
 public class ItemController {
     private final ItemService itemService;
     private static final String USER_HEADER = "X-Avito-User-Id";
+    private static final String USER_CITY = "X-Avito-City";
 
     @GetMapping("/{itemId}")
-    public ItemWithBookingDto getItem(@Positive @PathVariable long itemId,
+    public ItemWithBookingDto getItem(@RequestHeader(value = USER_CITY, required = false) String city,
+                                      @Positive @PathVariable long itemId,
                                       @RequestHeader(USER_HEADER) long userId) {
-        return itemService.getItemById(itemId, userId);
+        return itemService.getItemById(itemId, userId, city);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItems(@RequestParam String text) {
-        return itemService.searchItems(text);
+    public List<ItemDto> searchItems(
+            @RequestHeader(value = USER_HEADER, required = false) Long userId,
+            @RequestHeader(value = USER_CITY, required = false) String city,
+            @RequestParam String text) {
+        return itemService.searchItems(text, city, userId);
     }
 
     @PostMapping
@@ -58,8 +63,8 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public CommentDto writeAComment(@RequestHeader(USER_HEADER) long userId,
-                                             @Valid @RequestBody CommentCreateDto comment,
-                                             @PathVariable long itemId) {
+                                    @Valid @RequestBody CommentCreateDto comment,
+                                    @PathVariable long itemId) {
         return itemService.writeAComment(comment, userId, itemId);
     }
 
