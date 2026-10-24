@@ -6,3 +6,11 @@ spring:
     url: jdbc:postgresql://localhost:5433/itemsDB
     username: user
     password: 12345
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
+    topic:
+      view: view-topic
+      search: search-topic
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

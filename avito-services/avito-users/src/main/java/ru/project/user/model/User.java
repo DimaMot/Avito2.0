@@ -19,8 +19,7 @@ public class User {
     private String name; // — имя или логин пользователя;
 
     @Column(name = "email", nullable = false)
-    private String email; // — адрес электронной почты (учтите, что два пользователя не могут
-    // иметь одинаковый адрес электронной почты).
+    private String email; // — адрес электронной почты.
 
     @Override
     public boolean equals(Object o) {

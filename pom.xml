@@ -20,6 +20,7 @@
 		<module>common-libs</module>
 		<module>infra</module>
 		<module>avito-services</module>
+		<module>avito-analytics</module>
 	</modules>
 
 	<properties>

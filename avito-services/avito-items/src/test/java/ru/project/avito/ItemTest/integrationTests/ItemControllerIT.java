@@ -14,6 +14,7 @@ import ru.project.item.dto.ItemCreatDto;
 import ru.project.item.feign.BookingClient;
 import ru.project.item.feign.UserForItemClient;
 import ru.project.item.model.Item;
+import ru.project.item.service.KafkaProducer;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -39,6 +40,9 @@ public class ItemControllerIT extends BaseIntegrationTest {
 
     @MockBean
     private UserForItemClient userClient;
+
+    @MockBean
+    private KafkaProducer kafkaProducer;
 
     @MockBean
     private BookingClient bookingClient;

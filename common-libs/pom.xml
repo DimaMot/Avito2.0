@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>common-libs</artifactId>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
