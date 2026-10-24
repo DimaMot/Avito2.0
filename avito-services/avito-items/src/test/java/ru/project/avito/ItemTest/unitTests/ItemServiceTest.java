@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.project.commonlib.http.booking.BookingShortDto;
+import ru.project.commonlib.http.user.UserDto;
 import ru.project.item.dao.CommentRepository;
 import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.*;
@@ -22,6 +24,7 @@ import ru.project.item.feign.UserForItemClient;
 import ru.project.item.model.Comment;
 import ru.project.item.model.Item;
 import ru.project.item.service.ItemServiceImpl;
+import ru.project.item.service.KafkaProducer;
 import ru.project.item.service.update.ItemFieldUpdate;
 import ru.project.item.service.validate.ItemValidation;
 
@@ -48,6 +51,9 @@ public class ItemServiceTest {
     @Mock private ItemFieldUpdate availableFieldUpdate;
     @Mock private ItemFieldUpdate descriptionFieldUpdate;
     @Mock private ItemFieldUpdate nameFieldUpdate;
+
+    @Mock
+    private KafkaProducer producer;
 
     @Mock
     private ItemRepository itemRepository;
@@ -154,7 +160,7 @@ public class ItemServiceTest {
         when(bookingClient.getAllBookingForItems(List.of(testItemId))).thenReturn(Map.of(testItemId, List.of(prevBooking, nextBooking)));
         when(itemMapper.toItemWithBookingDto(eq(item), anyList(), eq(prevBooking), eq(nextBooking), anyMap())).thenReturn(expectedDto);
 
-        ItemWithBookingDto result = itemService.getItemById(testItemId, testUserId);
+        ItemWithBookingDto result = itemService.getItemById(testItemId, testUserId, null);
 
         assertNotNull(result);
         assertEquals(prevBooking, result.prevBooking());
@@ -171,7 +177,7 @@ public class ItemServiceTest {
         when(itemRepository.findById(invalidItemId)).thenReturn(Optional.empty());
 
         final NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> itemService.getItemById(invalidItemId, testUserId));
+                () -> itemService.getItemById(invalidItemId, testUserId, null));
 
         assertEquals("Предмет с id " + invalidItemId + " не найден", exception.getMessage());
 

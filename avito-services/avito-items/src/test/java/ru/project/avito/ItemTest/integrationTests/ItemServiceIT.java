@@ -1,6 +1,5 @@
 package ru.project.avito.ItemTest.integrationTests;
 
-
 import feign.FeignException;
 import feign.Request;
 import feign.RequestTemplate;
@@ -10,7 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.kafka.core.KafkaTemplate;
+import ru.project.commonlib.http.user.UserDto;
+import ru.project.commonlib.kafka.ItemSearchEvent;
+import ru.project.commonlib.kafka.ItemViewEvent;
 import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.*;
 import ru.project.item.dto.mapper.CommentMapper;
@@ -19,6 +21,7 @@ import ru.project.item.exceptions.NotFoundException;
 import ru.project.item.feign.UserForItemClient;
 import ru.project.item.model.Item;
 import ru.project.item.service.ItemService;
+import ru.project.item.service.KafkaProducer;
 import ru.project.item.service.update.ItemFieldUpdate;
 import ru.project.item.service.validate.ItemValidation;
 
@@ -35,6 +38,9 @@ public class ItemServiceIT extends BaseIntegrationTest {
 
     @Autowired
     private ItemService itemService;
+
+    @MockBean
+    private KafkaProducer kafkaProducer;
 
     @MockBean
     private UserForItemClient userClient;

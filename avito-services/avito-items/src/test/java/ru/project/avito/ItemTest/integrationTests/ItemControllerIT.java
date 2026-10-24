@@ -8,13 +8,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+import ru.project.commonlib.http.user.UserDto;
 import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.ItemCreatDto;
-import ru.project.item.dto.UserDto;
 import ru.project.item.feign.BookingClient;
 import ru.project.item.feign.UserForItemClient;
 import ru.project.item.model.Item;
+import ru.project.item.service.KafkaProducer;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -40,6 +40,9 @@ public class ItemControllerIT extends BaseIntegrationTest {
 
     @MockBean
     private UserForItemClient userClient;
+
+    @MockBean
+    private KafkaProducer kafkaProducer;
 
     @MockBean
     private BookingClient bookingClient;

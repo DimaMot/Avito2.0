@@ -1,6 +1,5 @@
 package ru.project.avito.bookingTest.unitTests;
 
-
 import feign.FeignException;
 import feign.Request;
 import feign.RequestTemplate;
@@ -26,6 +25,8 @@ import ru.project.booking.service.BookingServiceImpl;
 import ru.project.booking.service.search.BookingSearchRegistry;
 import ru.project.booking.service.search.role.BookingUserRole;
 import ru.project.booking.service.validator.BookingValidator;
+import ru.project.commonlib.http.item.ItemDtoForBookingService;
+import ru.project.commonlib.http.user.UserDto;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -67,7 +68,7 @@ public class BookingServiceImplTest {
     private BookingServiceImpl bookingService;
 
     private BookingCreateDto createDto;
-    private ItemDto itemDto;
+    private ItemDtoForBookingService itemDto;
     private UserDto userDto;
     private Booking booking;
 
@@ -75,7 +76,7 @@ public class BookingServiceImplTest {
     void setUp() {
         OffsetDateTime now = OffsetDateTime.now(clock);
         createDto = new BookingCreateDto(testItemId, now.plusDays(1), now.plusDays(2));
-        itemDto = new ItemDto(testItemId, "Дрель", "Мощная дрель", true, testOwnerId);
+        itemDto = new ItemDtoForBookingService(testItemId, "Дрель", "Мощная дрель", true, testOwnerId);
         userDto = new UserDto(testUserId, "Ivan", "ivan@mail.ru");
 
         booking = new Booking();

@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.project.commonlib.http.booking.BookingShortDto;
+import ru.project.commonlib.http.user.UserDto;
 import ru.project.item.dao.CommentRepository;
 import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.*;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
+    private final KafkaProducer producer;
     private final ItemRepository itemRepository;
     private final CommentRepository commentRepository;
     private final ItemMapper itemMapper;
@@ -41,12 +44,16 @@ public class ItemServiceImpl implements ItemService {
     private final List<ItemFieldUpdate> fieldUpdates;
 
     @Override
-    public List<ItemDto> searchItems(String text) {
+    public List<ItemDto> searchItems(String text, String city, Long userId) {
         log.info("Поиск предмета по ключевому слову: {}", text);
         if (text == null || text.isBlank()) return List.of();
         String query = text.toLowerCase();
         List<ItemDto> items = itemRepository.findAllBySearching(query);
-        if (items == null) {
+        log.info("Отправка в search: query={}, city={}, userId={}", query, city, userId);
+
+        producer.sendEvent(query, userId, city, items.size());
+
+        if (items.isEmpty()) {
             return List.of();
         }
         return items;
@@ -110,7 +117,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemWithBookingDto getItemById(long itemId, long userId) {
+    public ItemWithBookingDto getItemById(long itemId, long userId, String city) {
         log.info("Получение предмета по id {}", itemId);
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
@@ -124,11 +131,14 @@ public class ItemServiceImpl implements ItemService {
         Map<Long, String> userNames = ownerIdsComment.isEmpty() ? Map.of()
                 : users.stream().collect(Collectors.toMap(UserDto::id, UserDto::name));
 
+        OffsetDateTime now = OffsetDateTime.now(clock);
+
+        producer.sendEvent(itemId, userId, city, now.toInstant());
+
         if (item.getOwnerId() != userId) {
             return itemMapper.toItemWithBookingDto(item, item.getComments(), null, null, userNames);
         }
 
-        OffsetDateTime now = OffsetDateTime.now(clock);
         Map<Long, List<BookingShortDto>> bookingsByItem = bookingClient.getAllBookingForItems(List.of(itemId));
 
         List<BookingShortDto> bookings = bookingsByItem.getOrDefault(itemId, List.of());

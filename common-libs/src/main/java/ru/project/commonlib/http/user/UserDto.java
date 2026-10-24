@@ -1,4 +1,4 @@
-package ru.project.user.dto;
+package ru.project.commonlib.http.user;
 
 public record UserDto(
         Long id,

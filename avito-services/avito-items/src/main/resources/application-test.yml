@@ -6,6 +6,9 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    admin:
+      auto-create: false
 eureka:
   client:
     enabled: false

@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.project.item.dto.BookingShortDto;
+import ru.project.commonlib.http.booking.BookingShortDto;
 
 import java.time.OffsetDateTime;
 import java.util.List;

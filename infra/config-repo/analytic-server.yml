@@ -1,0 +1,32 @@
+server:
+  port: 8084
+spring:
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5435/analyticsDB
+    username: user
+    password: 12345
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      data-source-properties:
+        reWriteBatchedInserts: true
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
+    topic:
+      view: view-topic
+      search: search-topic
+    consumer:
+      view-group-id: analytic-view-group
+      search-group-id: analytic-search-group
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      max-poll-records: 500
+      properties:
+        fetch.min.bytes: 10000
+        fetch.max.wait.ms: 10000
+    listener:
+      type: batch

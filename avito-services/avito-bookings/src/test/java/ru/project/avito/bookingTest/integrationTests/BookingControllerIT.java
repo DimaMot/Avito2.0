@@ -11,10 +11,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.project.booking.dao.BookingRepository;
 import ru.project.booking.dto.BookingCreateDto;
-import ru.project.booking.dto.ItemDto;
-import ru.project.booking.dto.UserDto;
 import ru.project.booking.feign.ItemForBookingClient;
 import ru.project.booking.feign.UserForBookingClient;
+import ru.project.commonlib.http.item.ItemDtoForBookingService;
+import ru.project.commonlib.http.user.UserDto;
 
 import java.time.OffsetDateTime;
 
@@ -48,12 +48,12 @@ public class BookingControllerIT extends BaseIntegrationTest {
     private final long testItemId = 1L;
     private final long testUserId = 2L;
 
-    private ItemDto defaultItem;
+    private ItemDtoForBookingService defaultItem;
     private UserDto defaultUser;
 
     @BeforeEach
     void setUpContext() {
-        defaultItem = new ItemDto(testItemId, "Дрель", "Хорошая дрель", true, 1L);
+        defaultItem = new ItemDtoForBookingService(testItemId, "Дрель", "Хорошая дрель", true, 1L);
         defaultUser = new UserDto(testUserId, "dima", "dima@mail.ru");
     }
 

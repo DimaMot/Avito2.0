@@ -1,5 +1,7 @@
 package ru.project.item.dto;
 
+import ru.project.commonlib.http.booking.BookingShortDto;
+
 import java.util.List;
 
 public record ItemWithBookingDto(

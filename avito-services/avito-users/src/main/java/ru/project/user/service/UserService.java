@@ -1,7 +1,7 @@
 package ru.project.user.service;
 
+import ru.project.commonlib.http.user.UserDto;
 import ru.project.user.dto.CreateUserDto;
-import ru.project.user.dto.UserDto;
 
 import java.util.List;
 

@@ -3,9 +3,9 @@ package ru.project.booking.dao;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.project.booking.dto.BookingShortDto;
 import ru.project.booking.model.Booking;
 import ru.project.booking.model.BookingStatus;
+import ru.project.commonlib.http.booking.BookingShortDto;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -115,14 +115,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                                          @Param("status") BookingStatus status);
 
     @Query("""
-    SELECT new ru.project.booking.dto.BookingShortDto(b.id, b.start, b.end, b.bookerId, b.itemId)
+    SELECT new ru.project.commonlib.http.booking.BookingShortDto(b.id, b.start, b.end, b.bookerId, b.itemId)
     FROM Booking b
     WHERE b.itemId IN :itemIds
     """)
     List<BookingShortDto> getAllBookingForItems(@Param("itemIds") List<Long> itemIds);
 
     @Query("""
-    SELECT new ru.project.booking.dto.BookingShortDto(b.id, b.start, b.end, b.bookerId, b.itemId)
+    SELECT new ru.project.commonlib.http.booking.BookingShortDto(b.id, b.start, b.end, b.bookerId, b.itemId)
     FROM Booking b
     WHERE b.bookerId = :userId
     AND b.itemId = :itemId

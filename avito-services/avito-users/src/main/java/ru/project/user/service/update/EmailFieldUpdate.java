@@ -2,8 +2,8 @@ package ru.project.user.service.update;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.project.commonlib.http.user.UserDto;
 import ru.project.user.service.validate.UserValidation;
-import ru.project.user.dto.UserDto;
 import ru.project.user.model.User;
 
 @RequiredArgsConstructor
