@@ -40,7 +40,7 @@ public class ItemController {
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto createItem(@Valid @RequestBody ItemCreatDto item,
                               @RequestHeader(USER_HEADER) long userId) {
-        return itemService.creatItem(item, userId);
+        return itemService.createItem(item, userId);
     }
 
     @GetMapping

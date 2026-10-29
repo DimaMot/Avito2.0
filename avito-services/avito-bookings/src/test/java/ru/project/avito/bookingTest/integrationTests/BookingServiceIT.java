@@ -11,8 +11,9 @@ import ru.project.booking.dao.BookingRepository;
 import ru.project.booking.dto.BookingCreateDto;
 import ru.project.booking.dto.BookingResponseDto;
 import ru.project.booking.dto.mapper.BookingMapper;
-import ru.project.booking.exceptions.NotFoundException;
-import ru.project.booking.exceptions.ValidatedException;
+import ru.project.commonlib.exceptions.ForbiddenContentException;
+import ru.project.commonlib.exceptions.NotFoundException;
+import ru.project.commonlib.exceptions.ValidatedException;
 import ru.project.booking.feign.ItemForBookingClient;
 import ru.project.booking.feign.UserForBookingClient;
 import ru.project.booking.model.Booking;
@@ -165,7 +166,7 @@ public class BookingServiceIT extends BaseIntegrationTest {
         entityManager.clear();
         when(itemClient.getItemById(testItemId)).thenReturn(defaultItem);
         when(userClient.getUserById(testUserId)).thenReturn(defaultUser);
-        assertThrows(NotFoundException.class, () -> bookingService.getBookingById(book.getId(), 999L));
+        assertThrows(ForbiddenContentException.class, () -> bookingService.getBookingById(book.getId(), 999L));
     }
 
     @Test

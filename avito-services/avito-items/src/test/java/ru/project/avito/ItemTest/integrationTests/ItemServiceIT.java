@@ -9,15 +9,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.kafka.core.KafkaTemplate;
+import ru.project.commonlib.exceptions.NotFoundException;
 import ru.project.commonlib.http.user.UserDto;
-import ru.project.commonlib.kafka.ItemSearchEvent;
-import ru.project.commonlib.kafka.ItemViewEvent;
 import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.*;
 import ru.project.item.dto.mapper.CommentMapper;
 import ru.project.item.dto.mapper.ItemMapper;
-import ru.project.item.exceptions.NotFoundException;
 import ru.project.item.feign.UserForItemClient;
 import ru.project.item.model.Item;
 import ru.project.item.service.ItemService;
@@ -75,7 +72,7 @@ public class ItemServiceIT extends BaseIntegrationTest {
         UserDto testUser = new UserDto(testUserId, "testName", "test@mail.ru");
         when(userClient.getUserById(testUserId)).thenReturn(testUser);
 
-        ItemDto item = itemService.creatItem(createNewItem, testUserId);
+        ItemDto item = itemService.createItem(createNewItem, testUserId);
         entityManager.flush();
         entityManager.clear();
 
@@ -146,7 +143,7 @@ public class ItemServiceIT extends BaseIntegrationTest {
 
         when(userClient.getUserById(10L)).thenThrow(feignException);
 
-        assertThrows(NotFoundException.class, () -> itemService.creatItem(createNewItem, 10L));
+        assertThrows(NotFoundException.class, () -> itemService.createItem(createNewItem, 10L));
         assertEquals(0, itemRepository.count());
     }
 

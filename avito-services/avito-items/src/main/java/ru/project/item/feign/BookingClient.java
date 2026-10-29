@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@FeignClient(name = "booking-server", url = "http://booking-server:8083")
+@FeignClient(name = "booking-server")
 public interface BookingClient {
     @GetMapping("/bookings/item-link")
     Map<Long, List<BookingShortDto>> getAllBookingForItems(@RequestParam List<Long> itemIds);

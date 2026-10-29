@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.project.commonlib.exceptions.NotFoundException;
 import ru.project.commonlib.http.booking.BookingShortDto;
 import ru.project.commonlib.http.user.UserDto;
 import ru.project.item.dao.CommentRepository;
@@ -18,7 +19,6 @@ import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.*;
 import ru.project.item.dto.mapper.CommentMapper;
 import ru.project.item.dto.mapper.ItemMapper;
-import ru.project.item.exceptions.NotFoundException;
 import ru.project.item.feign.BookingClient;
 import ru.project.item.feign.UserForItemClient;
 import ru.project.item.model.Comment;
@@ -48,9 +48,12 @@ public class ItemServiceTest {
     private final String testItemDescription = "testDescription";
     private final boolean available = true;
 
-    @Mock private ItemFieldUpdate availableFieldUpdate;
-    @Mock private ItemFieldUpdate descriptionFieldUpdate;
-    @Mock private ItemFieldUpdate nameFieldUpdate;
+    @Mock
+    private ItemFieldUpdate availableFieldUpdate;
+    @Mock
+    private ItemFieldUpdate descriptionFieldUpdate;
+    @Mock
+    private ItemFieldUpdate nameFieldUpdate;
 
     @Mock
     private KafkaProducer producer;
@@ -106,7 +109,7 @@ public class ItemServiceTest {
         when(itemRepository.save(item)).thenReturn(item);
         when(itemMapper.toItemDto(item)).thenReturn(expectedDto);
 
-        ItemDto result = itemService.creatItem(createItem, testUserId);
+        ItemDto result = itemService.createItem(createItem, testUserId);
 
         assertEquals(result.id(), expectedDto.id());
         assertEquals(result.name(), expectedDto.name());
@@ -133,7 +136,7 @@ public class ItemServiceTest {
         when(userForItemClient.getUserById(testUserId)).thenThrow(feignException);
 
         final NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> itemService.creatItem(createItem, testUserId));
+                () -> itemService.createItem(createItem, testUserId));
 
         assertEquals("Пользователь не найден", exception.getMessage());
 
@@ -220,7 +223,7 @@ public class ItemServiceTest {
         final NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> itemService.updateItem(testItemId, updateRequest, hackerId));
 
-        assertTrue(exception.getMessage().contains("не является собственником предмета"));
+        assertTrue(exception.getMessage().contains("Предмет с id " + testItemId + " не найден"));
 
         verify(itemRepository, times(1)).findById(testItemId);
         verify(itemRepository, never()).saveAndFlush(any(Item.class));

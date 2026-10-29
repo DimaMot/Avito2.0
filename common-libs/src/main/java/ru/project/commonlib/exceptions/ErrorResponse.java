@@ -1,4 +1,4 @@
-package ru.project.item.exceptions;
+package ru.project.commonlib.exceptions;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

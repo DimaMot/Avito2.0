@@ -1,15 +1,16 @@
 package ru.project.user.service;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.project.commonlib.exceptions.ExternalServiceException;
+import ru.project.commonlib.exceptions.NotFoundException;
 import ru.project.commonlib.http.user.UserDto;
 import ru.project.user.dao.UserRepository;
 import ru.project.user.dto.CreateUserDto;
 import ru.project.user.dto.mapper.UserMapper;
-import ru.project.user.exceptions.NotFoundException;
-import ru.project.user.exceptions.ValidatedException;
 import ru.project.user.feign.ItemClientForUsers;
 import ru.project.user.model.User;
 import ru.project.user.service.update.UserFieldUpdate;
@@ -30,7 +31,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(long userId) {
-        log.info("Получение пользователя по id {}", userId);
+        log.info("Получение пользователя с id {}", userId);
         return userRepository.findById(userId)
                 .map(userMapper::toUserDto)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
@@ -48,9 +49,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto createUser(CreateUserDto user) {
         log.info("Создание пользователя");
-        if (user == null) {
-            throw new ValidatedException("Пользователь должен быть инициализован");
-        }
         userValidation.existEmail(user.email());
         User createdUser = userRepository.save(userMapper.toUser(user));
         log.info("Пользователь с id {} успешно создан", createdUser.getId());
@@ -66,13 +64,13 @@ public class UserServiceImpl implements UserService {
         try {
             itemClient.deleteAllById(userId);
             log.info("Сетевой запрос на удаление вещей пользователя {}", userId);
-        } catch (Exception e) {
+        } catch (FeignException e) {
             log.error("Не удалось удалить предметы пользователя {} по сети: {}", userId, e.getMessage());
-            throw new RuntimeException("Ошибка удаления предметов при удалении пользователя");
+            throw new ExternalServiceException("Ошибка удаления предметов пользователя");
         }
 
         userRepository.delete(user);
-        log.info("Пользователь c id {} удален", userId);
+        log.info("Пользователь с id {} удален", userId);
     }
 
     @Override

@@ -6,55 +6,56 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.project.user.exceptions.EmailConflictException;
-import ru.project.user.exceptions.ErrorResponse;
-import ru.project.user.exceptions.NotFoundException;
-import ru.project.user.exceptions.ValidatedException;
+import ru.project.commonlib.exceptions.*;
 
 import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
 public class ExceptionController {
+
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse NotFoundExceptionHandler(final NotFoundException e) {
-        log.info("Ресурс не найден (404 Not Found): {}", e.getMessage());
-        return new ErrorResponse("error", e.getMessage());
+    public ErrorResponse handleNotFound(NotFoundException e) {
+        log.info("Ресурс не найден (404): {}", e.getMessage());
+        return new ErrorResponse("NOT_FOUND", e.getMessage());
     }
 
     @ExceptionHandler(EmailConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse EmailConflictExceptionHandler(final EmailConflictException e) {
-        log.warn("Конфликт уникальности данных (409 Conflict): {}", e.getMessage());
-        return new ErrorResponse("Существующая почта", e.getMessage());
+    public ErrorResponse handleEmailConflict(EmailConflictException e) {
+        log.warn("Конфликт данных (409): {}", e.getMessage());
+        return new ErrorResponse("CONFLICT", e.getMessage());
     }
 
     @ExceptionHandler(ValidatedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse ValidateExceptionHandler(final ValidatedException e) {
-        log.warn("Бизнес-валидация нарушена (400 Bad Request): {}", e.getMessage());
-        return new ErrorResponse("Ошибка валидации", e.getMessage());
+    public ErrorResponse handleValidated(ValidatedException e) {
+        log.warn("Ошибка бизнес-валидации (400): {}", e.getMessage());
+        return new ErrorResponse("BAD_REQUEST", e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse MethodArgumentNotValidExceptionHandler(final MethodArgumentNotValidException e) {
+    public ErrorResponse handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
         String errorMessage = e.getBindingResult().getFieldErrors().stream()
-                .map(error -> {
-                    String field = error.getField();
-                    String message = error.getDefaultMessage();
-                    return "поле " + field + ": " + message;
-                })
+                .map(error -> "поле " + error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
-        log.warn("Ошибка валидации JSON структуры (400 Bad Request): {}", errorMessage);
-        return new ErrorResponse("Ошибка валидации входных данных", errorMessage);
+        log.warn("Ошибка валидации входных данных (400): {}", errorMessage);
+        return new ErrorResponse("BAD_REQUEST", errorMessage);
+    }
+
+    @ExceptionHandler(ExternalServiceException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorResponse handleExternalService(ExternalServiceException e) {
+        log.error("Ошибка доступа к внешнему сервису: {}", e.getMessage());
+        return new ErrorResponse("SERVICE_UNAVAILABLE", e.getMessage());
     }
 
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleUnhandledException(final Throwable e) {
-        log.error("Критическая системная ошибка сервера (500 Internal Server Error)", e);
-        return new ErrorResponse("Внутренняя ошибка сервера", e.getMessage());
+    public ErrorResponse handleThrowable(Throwable e) {
+        log.error("Внутренняя ошибка сервера (500)", e);
+        return new ErrorResponse("INTERNAL_SERVER_ERROR", e.getMessage());
     }
 }

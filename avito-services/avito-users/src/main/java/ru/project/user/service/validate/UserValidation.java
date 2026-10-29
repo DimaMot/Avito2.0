@@ -3,9 +3,9 @@ package ru.project.user.service.validate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.project.commonlib.exceptions.ValidatedException;
 import ru.project.user.dao.UserRepository;
-import ru.project.user.exceptions.EmailConflictException;
-import ru.project.user.exceptions.ValidatedException;
+import ru.project.commonlib.exceptions.EmailConflictException;
 
 @Component
 @RequiredArgsConstructor

@@ -8,8 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.project.booking.dao.BookingRepository;
 import ru.project.booking.dto.*;
 import ru.project.booking.dto.mapper.BookingMapper;
-import ru.project.booking.exceptions.NotFoundException;
-import ru.project.booking.exceptions.ValidatedException;
+import ru.project.commonlib.exceptions.ExternalServiceException;
+import ru.project.commonlib.exceptions.ForbiddenContentException;
+import ru.project.commonlib.exceptions.NotFoundException;
+import ru.project.commonlib.exceptions.ValidatedException;
 import ru.project.booking.feign.ItemForBookingClient;
 import ru.project.booking.feign.UserForBookingClient;
 import ru.project.booking.model.Booking;
@@ -53,11 +55,15 @@ public class BookingServiceImpl implements BookingService {
         ItemDtoForBookingService item = getItemFromOrThrow(createDto.itemId());
         UserDto user = getUserFromOrThrow(userId);
 
-        validator.validateItemAvailable(item, user, userId);
+        validator.validateItemAvailable(item, userId, createDto.start(), createDto.end());
+
+        if (bookingRepository.existsOverlappingBooking(item.id(), createDto.start(), createDto.end())) {
+            throw new ValidatedException("Вещь уже забронирована на выбранные даты");
+        }
 
         Booking booking = bookingMapper.toBooking(createDto, item.id(), user.id());
         Booking savedBooking = bookingRepository.save(booking);
-        log.info("Бронирование создано для пользоватле с id {} и предмета с id {}", userId, item.id());
+        log.info("Бронирование создано для пользователя с id {} и предмета с id {}", userId, item.id());
         return bookingMapper.responseDto(savedBooking, user, item);
     }
 
@@ -88,7 +94,7 @@ public class BookingServiceImpl implements BookingService {
         UserDto user = getUserFromOrThrow(booking.getBookerId());
 
         if (booking.getBookerId() != userId && item.ownerId() != userId) {
-            throw new NotFoundException("Пользователь не является создателем вещи или создателем бронирования");
+            throw new ForbiddenContentException("Пользователь не является создателем вещи или создателем бронирования");
         }
         return bookingMapper.responseDto(booking, user, item);
     }
@@ -139,6 +145,8 @@ public class BookingServiceImpl implements BookingService {
             return itemClient.getItemById(itemId);
         } catch (FeignException.NotFound e) {
             throw new NotFoundException("Предмет не найден");
+        } catch (FeignException e) {
+            throw new ExternalServiceException("Сервис недоступен");
         }
     }
 
@@ -147,6 +155,8 @@ public class BookingServiceImpl implements BookingService {
             return userClient.getUserById(userId);
         } catch (FeignException.NotFound e) {
             throw new NotFoundException("Пользователь не найден");
+        } catch (FeignException e) {
+            throw new ExternalServiceException("Сервис недоступен");
         }
     }
 

@@ -2,9 +2,10 @@ package ru.project.booking.service.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.project.booking.exceptions.ForbiddenContentException;
-import ru.project.booking.exceptions.NotFoundException;
-import ru.project.booking.exceptions.ValidatedException;
+import ru.project.booking.dao.BookingRepository;
+import ru.project.commonlib.exceptions.ForbiddenContentException;
+import ru.project.commonlib.exceptions.NotFoundException;
+import ru.project.commonlib.exceptions.ValidatedException;
 import ru.project.booking.model.Booking;
 import ru.project.booking.model.BookingStatus;
 import ru.project.commonlib.http.item.ItemDtoForBookingService;
@@ -17,6 +18,7 @@ import java.time.OffsetDateTime;
 @RequiredArgsConstructor
 public class BookingValidator {
     private final Clock clock;
+    private final BookingRepository bookingRepository;
 
     public void validateDates(OffsetDateTime start, OffsetDateTime end) {
         if (start == null || end == null || start.isAfter(end) || start.equals(end)) {
@@ -28,13 +30,17 @@ public class BookingValidator {
         }
     }
 
-    public void validateItemAvailable(ItemDtoForBookingService item, UserDto owner, long userId) {
+    public void validateItemAvailable(ItemDtoForBookingService item, long userId, OffsetDateTime start, OffsetDateTime end) {
         if (!item.available()) {
             throw new NotFoundException("Предмет недоступен для бронирования");
         }
 
         if (item.ownerId() == userId) {
             throw new NotFoundException("Владелец не может забронировать свою же вещь");
+        }
+
+        if (bookingRepository.existsOverlappingBooking(item.id(), start, end)) {
+            throw new ValidatedException("Вещь уже забронирована на выбранные даты");
         }
     }
 

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class SearchAnalyticsServer {
+public class SearchAnalyticsService {
     private final ItemSearchStatsByCityRepository cityRepository;
     private final ItemSearchStatsRepository statsRepository;
 

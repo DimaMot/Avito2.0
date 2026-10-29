@@ -29,7 +29,6 @@ public class ItemViewConsumer {
         log.info("количество записей - {}", records.count());
         for (ConsumerRecord<String, ItemViewEvent> record : records) {
             if (record.value() == null || record.value().itemId() == null) {
-                log.warn("Полученный ивент пуст(");
                 continue;
             }
 

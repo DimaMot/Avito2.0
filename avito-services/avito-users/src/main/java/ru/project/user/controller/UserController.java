@@ -31,7 +31,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto creatUser(@Valid @RequestBody CreateUserDto user) {
+    public UserDto createUser(@Valid @RequestBody CreateUserDto user) {
         return userService.createUser(user);
     }
 

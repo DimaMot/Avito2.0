@@ -2,9 +2,9 @@ package ru.project.item.service.validate;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.project.commonlib.exceptions.ValidatedException;
 import ru.project.commonlib.http.booking.BookingShortDto;
 import ru.project.item.dto.ItemCreatDto;
-import ru.project.item.exceptions.ValidatedException;
 import ru.project.item.feign.BookingClient;
 
 import java.time.OffsetDateTime;
@@ -20,6 +20,7 @@ public class ItemValidation {
             throw new ValidatedException("Предмет должен быть инициализирован");
         }
     }
+
     public void verifyBookingExist(long userId, long itemId, OffsetDateTime now) {
         Optional<BookingShortDto> bookingShortDto = bookingClient.getBookingByBookerId(userId, itemId, now);
 

@@ -1,4 +1,4 @@
-package ru.project.user.exceptions;
+package ru.project.commonlib.exceptions;
 
 public class EmailConflictException extends RuntimeException {
     public EmailConflictException(String message) {

@@ -8,7 +8,7 @@ import ru.project.commonlib.http.user.UserDto;
 
 import java.util.List;
 
-@FeignClient(name = "user-server", url = "http://user-server:8081")
+@FeignClient(name = "user-server")
 public interface UserForItemClient {
     @GetMapping("/users/{userId}")
     UserDto getUserById(@PathVariable("userId") long userId);

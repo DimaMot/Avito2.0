@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.project.commonlib.exceptions.ExternalServiceException;
+import ru.project.commonlib.exceptions.NotFoundException;
 import ru.project.commonlib.http.booking.BookingShortDto;
 import ru.project.commonlib.http.user.UserDto;
 import ru.project.item.dao.CommentRepository;
@@ -12,7 +14,6 @@ import ru.project.item.dao.ItemRepository;
 import ru.project.item.dto.*;
 import ru.project.item.dto.mapper.CommentMapper;
 import ru.project.item.dto.mapper.ItemMapper;
-import ru.project.item.exceptions.NotFoundException;
 import ru.project.item.feign.BookingClient;
 import ru.project.item.feign.UserForItemClient;
 import ru.project.item.model.Comment;
@@ -49,7 +50,6 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank()) return List.of();
         String query = text.toLowerCase();
         List<ItemDto> items = itemRepository.findAllBySearching(query);
-        log.info("Отправка в search: query={}, city={}, userId={}", query, city, userId);
 
         producer.sendEvent(query, userId, city, items.size());
 
@@ -97,17 +97,11 @@ public class ItemServiceImpl implements ItemService {
 
         return items.stream()
                 .map(item -> {
-                            List<BookingShortDto> bookingItem = bookingsByItem.getOrDefault(item.getId(), List.of());
+                            List<BookingShortDto> bookings = bookingsByItem.getOrDefault(item.getId(), List.of());
 
-                            BookingShortDto prev = bookingItem.stream()
-                                    .filter(b -> b.start().isBefore(now) || b.start().isEqual(now))
-                                    .max(Comparator.comparing(BookingShortDto::start))
-                                    .orElse(null);
+                            BookingShortDto prev = findPrevBooking(bookings, now);
 
-                            BookingShortDto next = bookingItem.stream()
-                                    .filter(b -> b.start().isAfter(now))
-                                    .min(Comparator.comparing(BookingShortDto::start))
-                                    .orElse(null);
+                            BookingShortDto next = findNextBooking(bookings, now);
 
                             return itemMapper.toItemWithBookingDto(item, item.getComments(), prev, next, usersName);
                         }
@@ -143,22 +137,16 @@ public class ItemServiceImpl implements ItemService {
 
         List<BookingShortDto> bookings = bookingsByItem.getOrDefault(itemId, List.of());
 
-        BookingShortDto prev = bookings.stream()
-                .filter(b -> b.start().isBefore(now) || b.start().isEqual(now))
-                .max(Comparator.comparing(BookingShortDto::start))
-                .orElse(null);
+        BookingShortDto prev = findPrevBooking(bookings, now);
 
-        BookingShortDto next = bookings.stream()
-                .filter(b -> b.start().isAfter(now))
-                .min(Comparator.comparing(BookingShortDto::start))
-                .orElse(null);
+        BookingShortDto next = findNextBooking(bookings, now);
 
         return itemMapper.toItemWithBookingDto(item, item.getComments(), prev, next, userNames);
     }
 
     @Override
     @Transactional
-    public ItemDto creatItem(ItemCreatDto itemCreat, long userId) {
+    public ItemDto createItem(ItemCreatDto itemCreat, long userId) {
         log.info("Создание предмета от пользователя с id {}", userId);
         itemValidation.initializeItem(itemCreat);
 
@@ -175,7 +163,7 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
         itemRepository.deleteById(itemId);
-        log.info("Предмета с id {} удален", itemId);
+        log.info("Предмет с id {} удален", itemId);
     }
 
     @Override
@@ -184,9 +172,10 @@ public class ItemServiceImpl implements ItemService {
         log.info("Обновление предмета с id {} и id пользователя {}", itemId, userId);
         Item oldItem = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
+
         if (oldItem.getOwnerId() != userId) {
             log.warn("Пользователь с id {} пытался обновить чужой предмет с id {}", userId, itemId);
-            throw new NotFoundException("Пользователь с id " + userId + " не является собственником предмета с id " + itemId);
+            throw new NotFoundException("Предмет с id " + itemId + " не найден");
         }
 
         fieldUpdates.stream()
@@ -204,18 +193,17 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto writeAComment(CommentCreateDto newComment, long userId, long itemId) {
         log.info("Добавление комментария предмету {} от пользователя {}", itemId, userId);
         UserDto user = getUserOrThrow(userId);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с " + userId + " не найден");
-        }
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
         OffsetDateTime now = OffsetDateTime.now(clock);
 
         itemValidation.verifyBookingExist(userId, itemId, now);
+
         Comment createdComment = commentMapper.toComment(newComment);
         createdComment.setItem(item);
         createdComment.setAuthorId(userId);
         createdComment.setCreated(now);
+
         Comment comment = commentRepository.save(createdComment);
         log.info("Комментарий с id {} успешно создан", comment.getId());
         return commentMapper.toCommentDto(comment, Map.of(user.id(), user.name()));
@@ -244,11 +232,27 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.deleteAllByOwnerId(userId);
     }
 
+    private BookingShortDto findPrevBooking(List<BookingShortDto> bookings, OffsetDateTime now) {
+        return bookings.stream()
+                .filter(b -> b.start().isBefore(now) || b.start().isEqual(now))
+                .max(Comparator.comparing(BookingShortDto::start))
+                .orElse(null);
+    }
+
+    private BookingShortDto findNextBooking(List<BookingShortDto> bookings, OffsetDateTime now) {
+        return bookings.stream()
+                .filter(b -> b.start().isAfter(now))
+                .min(Comparator.comparing(BookingShortDto::start))
+                .orElse(null);
+    }
+
     private UserDto getUserOrThrow(long userId) {
         try {
             return userForItemClient.getUserById(userId);
         } catch (FeignException.NotFound e) {
             throw new NotFoundException("Пользователь не найден");
+        } catch (FeignException e) {
+            throw new ExternalServiceException("Сервис недоступен");
         }
     }
 
@@ -256,7 +260,9 @@ public class ItemServiceImpl implements ItemService {
         try {
             return userForItemClient.getUsersByUserIds(userIds);
         } catch (FeignException.NotFound e) {
-            throw new NotFoundException("Пользователи не найден");
+            throw new NotFoundException("Пользователи не найдены");
+        } catch (FeignException e) {
+            throw new ExternalServiceException("Сервис недоступен");
         }
     }
 }

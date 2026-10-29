@@ -13,7 +13,7 @@ public interface ItemService {
 
     ItemWithBookingDto getItemById(long itemId, long userId, String city);
 
-    ItemDto creatItem(ItemCreatDto itemCreat, long userId);
+    ItemDto createItem(ItemCreatDto itemCreat, long userId);
 
     void deleteItemById(long itemId);
 

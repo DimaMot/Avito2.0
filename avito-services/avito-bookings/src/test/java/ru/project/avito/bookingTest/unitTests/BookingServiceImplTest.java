@@ -14,8 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.project.booking.dao.BookingRepository;
 import ru.project.booking.dto.*;
 import ru.project.booking.dto.mapper.BookingMapper;
-import ru.project.booking.exceptions.NotFoundException;
-import ru.project.booking.exceptions.ValidatedException;
+import ru.project.commonlib.exceptions.ForbiddenContentException;
+import ru.project.commonlib.exceptions.NotFoundException;
+import ru.project.commonlib.exceptions.ValidatedException;
 import ru.project.booking.feign.ItemForBookingClient;
 import ru.project.booking.feign.UserForBookingClient;
 import ru.project.booking.model.Booking;
@@ -106,7 +107,7 @@ public class BookingServiceImplTest {
         assertEquals(BookingStatus.WAITING, result.status());
 
         verify(validator, times(1)).validateDates(createDto.start(), createDto.end());
-        verify(validator, times(1)).validateItemAvailable(itemDto, userDto, testUserId);
+        verify(validator, times(1)).validateItemAvailable(itemDto, testUserId, createDto.start(), createDto.end());
         verify(bookingRepository, times(1)).save(booking);
     }
 
@@ -179,7 +180,7 @@ public class BookingServiceImplTest {
         when(itemClient.getItemById(testItemId)).thenReturn(itemDto);
         when(userClient.getUserById(testUserId)).thenReturn(userDto);
 
-        assertThrows(NotFoundException.class, () -> bookingService.getBookingById(testBookingId, hackerId));
+        assertThrows(ForbiddenContentException.class, () -> bookingService.getBookingById(testBookingId, hackerId));
     }
 
     @Test
